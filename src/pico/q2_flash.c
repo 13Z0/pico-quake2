@@ -17,6 +17,7 @@
 //
 // Erases are split into 64 KB steps so interrupts are not held off for long.
 
+#include <stdio.h>
 #include <string.h>
 
 #include "pico/stdlib.h"
@@ -32,6 +33,11 @@
 #define XIP_BASE_ADDR	0x10000000u
 #define ERASE_STEP		(64 * 1024)
 #define PROGRAM_STEP	4096
+
+// Q2_FLASH_DIAG=1: log every erase and program with its duration on the UART
+#ifndef Q2_FLASH_DIAG
+#define Q2_FLASH_DIAG	0
+#endif
 
 static fc_flash_t	cache_flash;
 static uint8_t		__scratch_x("q2_flash_bounce") bounce[PROGRAM_STEP] __attribute__((aligned(4)));	// 4 KB SCRATCH_X bank
@@ -78,7 +84,14 @@ static void cache_erase (unsigned offset, unsigned len)
 		// 64 KB at a time where aligned (the bootrom then uses block erase)
 		unsigned	step = (offset % ERASE_STEP == 0 && len >= ERASE_STEP) ? ERASE_STEP : FC_SECTOR;
 
+#if Q2_FLASH_DIAG
+		printf ("fl: erase %06x %u\n", offset, step);
+		uint32_t	t0 = time_us_32 ();
+#endif
 		erase_safe (flash_offset (offset), step);
+#if Q2_FLASH_DIAG
+		printf ("fl: ok %lu us\n", (unsigned long)(time_us_32 () - t0));
+#endif
 		offset += step;
 		len -= step;
 	}
@@ -93,7 +106,14 @@ static void cache_program (unsigned offset, const void *data, unsigned len)
 		unsigned	step = len < PROGRAM_STEP ? len : PROGRAM_STEP;
 
 		memcpy (bounce, src, step);
+#if Q2_FLASH_DIAG
+		printf ("fl: program %06x %u\n", offset, step);
+		uint32_t	t0 = time_us_32 ();
+#endif
 		program_safe (flash_offset (offset), bounce, step);
+#if Q2_FLASH_DIAG
+		printf ("fl: ok %lu us\n", (unsigned long)(time_us_32 () - t0));
+#endif
 		offset += step;
 		src += step;
 		len -= step;

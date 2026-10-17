@@ -16,7 +16,7 @@ Phase 2 (performance) has started. Phase 3 is done apart from testing more input
 
 ```sh
 ./fruitjam-build.sh                          # -> build_fruitjam/src/pico/quake2.uf2
-./fruitjam-build.sh -DQ2_CPU_KHZ=504000      # 504 MHz (1.60 V) instead of 378 MHz
+./fruitjam-build.sh -DQ2_CPU_KHZ=504000      # 504 MHz (1.70 V) instead of 378 MHz
 ```
 
 Options (CMake): `Q2_CPU_KHZ` (a multiple of 126000), `Q2_VREG`, `Q2_ZBUFFER_SRAM`.
@@ -461,12 +461,20 @@ Notes:
   | Waiting for the frame flip | 2% |
 
   85% of the samples are in SRAM code. What remains is mostly PSRAM and XIP latency.
-- **504 MHz is broken in this build.** The first level load that has to write the flash
-  cache hangs. In one run it hung inside the boot ROM's flash erase (QMI stuck in direct
-  mode); in another, with all interrupts off, inside the SD card transfer. A flash erase
-  left the QMI wedged, so OpenOCD could not program the board again until a watchdog
-  reset (`mww 0x400d8000 0x80000000`, written while the cores are halted) or a power
-  cycle. 378 MHz writes the cache without problems.
+- **504 MHz needs 1.70 V.**
+  - At 1.60 V the first level load that writes the flash cache failed within a few
+    erases. The failures varied:
+    - core1 took an undefined-instruction fault on a valid instruction in SRAM;
+    - the boot ROM's flash erase left the QMI stuck in direct mode;
+    - DMA reported a read error.
+  - A wedged QMI stops OpenOCD from programming the board until a watchdog reset
+    (`mww 0x400d8000 0x80000000`, written while the cores are halted) or a power cycle.
+  - At 1.70 V, which the pico_shared emulators use at 504 MHz, the board ran without a fault
+    through about 11,700 erases and programs (6.7 MB) and several minutes of the attract
+    loop. `Q2_VREG` now defaults to `VREG_VOLTAGE_1_70` above 378 MHz.
+  - At the end of this pass, 504 MHz gives 21.8 fps at viewsize 100 (19.9 at 378 MHz) and
+    24.6 fps at viewsize 70 (22.6). The gain is small for the same reason as above.
+  - 378 MHz stays the default: at 504 MHz and 1.70 V the board runs too hot.
 
 ### Flash layout (16 MB boards, planned)
 
@@ -499,6 +507,5 @@ A demo level needs 6–9 MB of cache, so the port requires a board with 16 MB of
   - Sound took 32 KB (ring) + 16 KB (I2S) + 36 KB (HDMI queue) + 9 KB (mixer).
   - The performance pass moved about 16 KB of code and 17 KB of renderer state in.
   - The z-buffer (150 KB) stays in PSRAM.
-- 504 MHz: find out why the first flash-cache write hangs (see Performance pass).
 - Further performance: model z tests (skip the read for the view weapon), BSP and edge
   data in PSRAM, particles.

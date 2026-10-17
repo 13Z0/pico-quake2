@@ -36,7 +36,7 @@ target_include_directories(quake2 PRIVATE
 # Q2_CPU_KHZ: 378000 (default) or 504000; Q2_VREG: core voltage for it.
 set(Q2_CPU_KHZ "378000" CACHE STRING "System clock in kHz (a multiple of 126000)")
 if (Q2_CPU_KHZ GREATER 378000)
-    set(_q2_vreg_default VREG_VOLTAGE_1_60)
+    set(_q2_vreg_default VREG_VOLTAGE_1_70)		# as the emulators (pico_shared) at 504 MHz
 else()
     set(_q2_vreg_default VREG_VOLTAGE_1_50)
 endif()
