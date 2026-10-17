@@ -1,0 +1,10 @@
+# host harness build output
+hosttest/build/
+hosttest/q2_host
+
+# firmware build directories
+build*/
+releases/
+
+# release rehearsal (./buildAll.sh, tools/release_notes.sh)
+/release-notes.md
