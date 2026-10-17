@@ -66,9 +66,11 @@ tools/release_notes.sh v0.1-alpha   # the CHANGELOG.md section of that tag
 
 - **Workflow.** `.github/workflows/BuildAndRelease.yml` runs these two on the
   self-hosted runner when a tag (`v0.N`, `v0.N.M`, `v*.*-alpha`) is pushed, or through
-  `gh workflow run BuildAndRelease.yml -f tag=<tag>`. Without a tag it only builds. A tag
-  with a suffix is published as a pre-release. The release text is the tag's section of
-  `CHANGELOG.md`; the workflow fails if there is none.
+  `gh workflow run BuildAndRelease.yml -f tag=<tag>`. Without a tag it only builds.
+  Every release, `-alpha` tags included, is published as a regular release: GitHub
+  never marks a pre-release as the latest release, so the repository page would not
+  show it. The release text is the tag's section of `CHANGELOG.md`; the workflow fails
+  if there is none.
 - **Firmware.** `buildAll.sh` builds each board in a fresh `build_release_<board>`,
   because CMake options are sticky: a development tree could carry `Q2_CPU_KHZ` or
   `Q2_ZBUFFER_SRAM` into a release. `Q2_RELEASE_VERSION` stamps the UF2's binary info

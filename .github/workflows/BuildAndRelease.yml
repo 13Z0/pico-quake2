@@ -11,7 +11,9 @@ name: Build and create a release
 #     release can be cut without a tag push. Dispatching with an EMPTY tag builds
 #     everything and releases nothing: the dry run to use before tagging.
 #
-# A tag with a suffix (v0.1-alpha) is published as a pre-release.
+# Every release, a suffixed tag such as v0.1-alpha included, is published as a
+# regular release and becomes the latest one: GitHub never marks a pre-release as
+# latest, so the repository page would not show it.
 #
 # The job body is deliberately thin: the files come from ./buildAll.sh and the
 # release text from tools/release_notes.sh, so both can be tested locally.
@@ -90,7 +92,6 @@ jobs:
               target_commitish: ${{ github.sha }}
               name: ${{ steps.ver.outputs.tag }}
               body_path: release-notes.md
-              prerelease: ${{ contains(steps.ver.outputs.tag, '-') }}
               fail_on_unmatched_files: true
               files: |
                 releases/*.uf2
