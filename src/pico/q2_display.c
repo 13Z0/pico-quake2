@@ -32,6 +32,7 @@ static volatile int		front;			// framebuffer core1 scans out
 static volatile int		pending_front = -1;
 static volatile int		lut_front;
 static volatile int		pending_lut = -1;
+static int				engine_lut = -1;	// engine palette held back while the boot console shows
 static volatile uint32_t	frames;
 static bool		video_up;
 
@@ -77,7 +78,7 @@ static void load_console_palette (uint32_t *pal)
 {
 	memset (pal, 0, 256 * sizeof(uint32_t));
 	pal[Q2CON_BG] = rgb555x2 (0, 0, 0);
-	pal[Q2CON_FG] = rgb555x2 (200, 200, 200);
+	pal[Q2CON_FG] = rgb555x2 (255, 255, 255);
 	pal[Q2CON_TITLE_BG] = rgb555x2 (120, 60, 20);
 	pal[Q2CON_TITLE_FG] = rgb555x2 (255, 255, 255);
 }
@@ -184,7 +185,13 @@ void SWimp_SetPalette (const unsigned char *pal)
 	dst = lut[back];
 	for (i = 0; i < 256; i++, pal += 4)
 		dst[i] = rgb555x2 (pal[0], pal[1], pal[2]);
-	pending_lut = back;
+	// The engine sets its palette while the boot console is still on screen, and the
+	// console's colours are indices 0-3, nearly black in the Quake palette: hold the
+	// palette back until the engine shows its first frame (SWimp_EndFrame).
+	if (q2_console_active ())
+		engine_lut = back;
+	else
+		pending_lut = back;
 }
 
 // Waits until the flip requested by the last SWimp_EndFrame has happened, i.e. until
@@ -206,7 +213,14 @@ void SWimp_EndFrame (void)
 	int			back = front ^ 1;
 
 	if (q2_console_active ())
+	{
 		q2_console_stop ();		// the engine has drawn a frame of its own
+		if (engine_lut >= 0)
+		{
+			pending_lut = engine_lut;	// latched with this frame, at the same vsync
+			engine_lut = -1;
+		}
+	}
 
 	// a frame that wrote nothing must still not schedule two flips at once
 	SWimp_WaitBuffer ();
