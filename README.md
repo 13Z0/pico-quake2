@@ -194,7 +194,8 @@ For questions about the case, please contact the designer on the Thingiverse pag
 3. Copy the firmware file onto that drive. The board restarts and shows an error,
    because the game data is not on the card yet.
 4. Unpack `pico-quake2_demo_sdcard.zip` to the root of the SD card. This creates the
-   folder `roms/quake2`.
+   folder `roms/quake2`. On Windows, `updateAll.exe` can install the demo instead; see
+   [Installing the demo with updateAll](#installing-the-demo-with-updateall).
    To use your own copy of Quake II instead, copy its `baseq2` folder into
    `roms/quake2` on the card.
 5. Insert the card, connect the HDMI screen and a controller, and switch the board on.
@@ -211,6 +212,31 @@ roms/quake2/baseq2/players/      player models and skins
 roms/quake2/baseq2/config.cfg    settings and key bindings, written by the game
 roms/quake2/baseq2/save/         savegames, written by the game
 ```
+
+### Installing the demo with updateAll
+
+`updateAll.exe`, a program for Windows 10 and 11, is included in the releases of
+pico-quake2, among the files at the end of the release page. It runs on a computer with
+the SD card inserted: it downloads `pico-quake2_demo_sdcard.zip` from the releases of
+this repository and writes the demo, unpacked, into `/roms/quake2`, together with
+`license.txt`. It is a single file and needs no installation. The program is not signed,
+so Windows may show "Windows protected your PC" the first time it is started; select
+**More info**, then **Run anyway**.
+
+1. Start `updateAll.exe`. It selects a removable drive by itself; under **SD card**,
+   check that it is the card, or choose another.
+2. Untick the entries that are not wanted. updateAll also installs the arcade ROM sets
+   and the game data of other applications of this family, such as *Doom* and
+   *Duke Nukem 3D*; pico-quake2 needs only **Quake II**. The **Status** column shows
+   which entries are already complete on the card.
+3. Select **Install**. The demo is a download of about 35 MB.
+
+updateAll is maintained in
+[pico-bootLoader](https://github.com/PicoPlus-devel/pico-bootLoader), whose SD-card
+archive carries it as well. The same installer is also available there as a Python
+script, `updateAll.py`, for Linux and macOS, and as a PowerShell script, `updateAll.ps1`.
+The [updateAll README](https://github.com/PicoPlus-devel/pico-bootLoader/blob/main/updateAll/README.md)
+describes all three and their options.
 
 ### The demo data and its licence
 
@@ -230,7 +256,8 @@ Quake II can also be started from the menu of
 [pico-bootLoader](https://github.com/PicoPlus-devel/pico-bootLoader), which keeps several
 applications on one board. It is listed in the bootloader's **Ports** category on both
 boards, and the bootloader's SD-card archive contains its firmware. The game data is not
-part of that archive: install it in `roms/quake2` as described above.
+part of that archive: install it in `roms/quake2` as described above, or with the
+updateAll in the archive's `updateAll` folder.
 
 - Quitting the game, or pressing RESET, returns to the bootloader menu.
 - Other applications started from the bootloader may overwrite part of the flash memory

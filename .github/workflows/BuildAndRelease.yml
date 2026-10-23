@@ -17,6 +17,9 @@ name: Build and create a release
 #
 # The job body is deliberately thin: the files come from ./buildAll.sh and the
 # release text from tools/release_notes.sh, so both can be tested locally.
+# updateAll.exe, the game data installer for Windows that is released alongside,
+# is built from pico-bootLoader and holds no game data: it downloads the demo on
+# the user's computer.
 on:
     push:
         tags:
@@ -73,6 +76,21 @@ jobs:
           - name: List release files
             run: ls -l releases/
 
+          # updateAll is maintained in pico-bootLoader. Its main branch is used:
+          # it knows the demo data of this application.
+          - name: Check out pico-bootLoader, for updateAll.exe
+            uses: actions/checkout@v6
+            with:
+                repository: PicoPlus-devel/pico-bootLoader
+                path: pico-bootLoader
+                fetch-depth: 0          # tags, so that updateAll.exe gets a version
+                filter: blob:none
+                sparse-checkout: updateAll
+
+          - name: Build updateAll.exe, the game data installer for Windows (needs mingw-w64 on the runner)
+            run: |
+                 pico-bootLoader/updateAll/win/build.sh
+
           # The PicoNES PCB Gerber files come from pico_shared, which is not a
           # submodule of this repository. Only the designs this port can use are
           # attached: v2.6 (NES controller ports) and v2.8 (SNES controller ports).
@@ -109,3 +127,4 @@ jobs:
                 releases/*.uf2
                 releases/*.zip
                 pcb/*.zip
+                pico-bootLoader/updateAll/win/build/updateAll.exe

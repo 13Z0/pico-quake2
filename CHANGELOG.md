@@ -6,6 +6,20 @@ card, and the game is played with a USB gamepad or a USB keyboard and mouse.
 
 [The files of this release are listed at the end of these notes](#downloads___).
 
+## v0.2.1-alpha
+
+The firmware is the same as in v0.2-alpha.
+
+- The release now includes **updateAll.exe**, which installs the Quake II demo in
+  `/roms/quake2` on the SD card from a Windows computer. The README explains how to use
+  it.
+- **PicoNES PCB Gerber files.** The release now includes the Gerber files of the
+  PicoNES PCB: `pico_nesPCB_v2.6.zip` with NES controller ports, and
+  `pico_nesPCB_v2.8_SNES_PORTS.zip` with SNES controller ports, designed by John Edgar
+  Park ([@johnedgarpark](https://twitter.com/johnedgarpark)). See
+  [PicoNES PCB](https://github.com/PicoPlus-devel/pico-quake2#picones-pcb) in the
+  README.
+
 ## v0.2-alpha
 
 Second pre-release. It adds a second board, NES and SNES controllers, and a version for
