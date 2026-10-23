@@ -86,7 +86,7 @@ text shown on the screen, if any.
 | Pimoroni Pico Plus 2 with the Adafruit DVI breakout and microSD breakout (pico_shared hardware configuration 2) | `pico-quake2_adafruitdvisd.uf2` |
 
 The second board is the configuration the pico_shared emulators call HW_CONFIG 2, built
-on a breadboard or on a printed circuit board. It must use a
+on a breadboard or on the [PicoNES printed circuit board](#picones-pcb). It must use a
 [Pimoroni Pico Plus 2](https://shop.pimoroni.com/products/pimoroni-pico-plus-2), or
 another RP2350B module with 8 MB of PSRAM on GPIO 47 and 16 MB of flash; a Raspberry Pi
 Pico 2 has no PSRAM and does not work. It is wired as follows:
@@ -100,6 +100,78 @@ Pico 2 has no PSRAM and does not work. It is wired as follows:
 | NES/SNES controller port 2 | CLK 9, DATA 10, LATCH 11 |
 | PCM5100A I2S DAC (optional) | DATA 26, BCK 27, LRCK 28 |
 | Serial console (optional) | TX 0, RX 1 |
+
+## PicoNES PCB
+
+The second board can be built on the PicoNES PCB by John Edgar Park instead of a
+breadboard, which turns it into a finished console with two controller ports and a case.
+The PCB comes in two versions, which differ only in the controller ports: **v2.6** with
+NES controller ports and **v2.8** with SNES controller ports. Parts lists, ordering
+instructions, assembly notes, the pin assignment and the 3D-printed case are described in
+the [PCB README](https://github.com/PicoPlus-devel/pico_shared/blob/main/PCB/README.md).
+The Gerber files of both versions are attached to every
+[release](https://github.com/PicoPlus-devel/pico-quake2/releases).
+
+| Design | Picture | Controller ports | Designed by |
+|---|---|---|---|
+| PicoNES v2.6 | <img src="https://raw.githubusercontent.com/PicoPlus-devel/pico_shared/main/PCB/images/picones_v2.6_assembled.jpg" width="240" alt="PicoNES v2.6 with a Pimoroni Pico Plus 2"><br><sub>See note</sub> | 2 × NES | [John Edgar Park](https://twitter.com/johnedgarpark) |
+| PicoNES v2.8 | <img src="https://raw.githubusercontent.com/PicoPlus-devel/pico_shared/main/PCB/images/picones_v2.8s_assembled.jpg" width="240" alt="PicoNES v2.8 with SNES controller ports"><br><sub>See note</sub> | 2 × SNES | [John Edgar Park](https://twitter.com/johnedgarpark) |
+
+> [!NOTE]
+> The PicoNES v2.6 and v2.8 are shown with a Pimoroni Pico Plus 2. Quake II needs its
+> PSRAM and 16 MB of flash, so no other board can be fitted.
+
+The other designs in the PCB README, the PicoNES Mini and PicoNES Micro, carry boards
+without PSRAM and cannot run the game.
+
+> [!NOTE]
+> Sellers on AliExpress have copied the PicoNES design and sell ready-made boards. For
+> questions about those, contact the seller.
+
+- **Mounting.** The Pimoroni Pico Plus 2 must be mounted on male pin headers, because the
+  SP/CE connector on its back prevents it from lying flat. Optional female socket headers,
+  soldered into the PCB, let the board be plugged in and swapped without desoldering.
+- **Controllers.** On the PCB, Quake II is played with NES or SNES controllers only. It
+  reads USB devices through a USB-A socket on GPIO 20/21 (see [Boards](#boards)), which
+  the PCB does not have. On v2.8, SNES controllers plug in directly; on v2.6, NES
+  controllers do, and a SNES controller needs a
+  [SNES-to-NES adapter cable](https://github.com/PicoPlus-devel/pico-snesPlus/blob/main/snestonescontroller.md),
+  one per port. See [NES and SNES controllers](#nes-and-snes-controllers) for the
+  layout.
+- **Sound.** Over HDMI. The PCB has no place for the optional PCM5100A DAC; its pins are
+  used by controller port 2.
+- **microSD breakout.** The PCB is laid out for the smaller
+  [Adafruit Micro SD SPI or SDIO Card Breakout](https://www.adafruit.com/product/4682),
+  which uses the same GPIO as the breakout in the wiring table above.
+- **What to flash.** `pico-quake2_adafruitdvisd.uf2`, the same file as for the
+  breadboard.
+
+The parts lists and assembly notes are in the PCB README:
+[PicoNES v2.6](https://github.com/PicoPlus-devel/pico_shared/blob/main/PCB/README.md#picones-v26-nes-controller-ports)
+and
+[PicoNES v2.8](https://github.com/PicoPlus-devel/pico_shared/blob/main/PCB/README.md#picones-v28-snes-controller-ports).
+
+| NES controller ports (v2.6) | SNES controller ports (v2.8) |
+|---|---|
+| <img src="https://raw.githubusercontent.com/PicoPlus-devel/pico_shared/main/PCB/images/picones_v2.6_assembled.jpg" width="400" alt="PicoNES v2.6 with NES controller ports"> | <img src="https://raw.githubusercontent.com/PicoPlus-devel/pico_shared/main/PCB/images/picones_v2.8s_assembled.jpg" width="400" alt="PicoNES v2.8 with SNES controller ports"> |
+
+### 3D printed case
+
+Gavin Knight ([DynaMight1124](https://github.com/DynaMight1124)) designed an NES-like case
+for the v2.6 PCB: [thingiverse.com/thing:6689537](https://www.thingiverse.com/thing:6689537).
+It does not fit the v2.8 PCB. Two top covers are available, one with a button that presses
+the BOOTSEL button for firmware updates and one without. All parts are shown in the
+[PCB README](https://github.com/PicoPlus-devel/pico_shared/blob/main/PCB/README.md#3d-printed-case).
+For questions about the case, please contact the designer on the Thingiverse page.
+
+> [!IMPORTANT]
+> Download the **latest** top cover. The Pimoroni Pico Plus 2 is always mounted on headers
+> here, and headers raise the board. Only the newest cover leaves room for the USB cable;
+> the older ones assume a Pico soldered flat onto the PCB.
+
+| Top cover | Base |
+|---|---|
+| <img src="https://github.com/user-attachments/assets/c6205db3-580e-41e9-83e4-66c9534c6519" width="380" alt="Top cover"> | <img src="https://github.com/user-attachments/assets/256bbd1b-b6db-485d-a59c-fd22fd017887" width="380" alt="Base with the PCB fitted"> |
 
 ## What you need
 
