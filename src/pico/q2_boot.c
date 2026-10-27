@@ -128,6 +128,10 @@ static void setup_clocks (void)
 	clock_configure (clk_hstx, 0, CLOCKS_CLK_HSTX_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
 		126000000u, 126000000u);
 #else
+	// The native USB controller is the host (HW_CONFIG 2) and needs PLL_USB at
+	// its 48 MHz, so clk_hstx comes from clk_sys (378 / 3 or 504 / 4 = 126 MHz),
+	// as in pico_shared and pico-doom on these boards. PLL_SYS jitter then rides
+	// on the TMDS clock, which strict HDMI displays can show as sparkles.
 	clock_configure (clk_hstx, 0, CLOCKS_CLK_HSTX_CTRL_AUXSRC_VALUE_CLK_SYS,
 		Q2_CPU_KHZ * 1000u, 126000000u);
 #endif

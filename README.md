@@ -95,11 +95,13 @@ Pico 2 has no PSRAM and does not work. It is wired as follows:
 |---|---|
 | [Adafruit DVI breakout](https://www.adafruit.com/product/4984) | D0+ 12, CK+ 14, D2+ 16, D1+ 18 (and the pins next to them) |
 | [Adafruit microSD breakout](https://www.adafruit.com/product/254) | SCK 2, MOSI 3, MISO 4, CS 5 |
-| USB host socket (USB-A) | D+ 20, D− 21; 5 V from VBUS |
 | NES/SNES controller port 1 | CLK 6, DATA 7, LATCH 8 |
 | NES/SNES controller port 2 | CLK 9, DATA 10, LATCH 11 |
 | PCM5100A I2S DAC (optional) | DATA 26, BCK 27, LRCK 28 |
 | Serial console (optional) | TX 0, RX 1 |
+
+USB devices are connected to the USB-C port of the Pico Plus 2 through a USB OTG adapter
+or Y-cable, which also has to supply the board's power; several devices need a USB hub.
 
 ## PicoNES PCB
 
@@ -131,13 +133,12 @@ without PSRAM and cannot run the game.
 - **Mounting.** The Pimoroni Pico Plus 2 must be mounted on male pin headers, because the
   SP/CE connector on its back prevents it from lying flat. Optional female socket headers,
   soldered into the PCB, let the board be plugged in and swapped without desoldering.
-- **Controllers.** On the PCB, Quake II is played with NES or SNES controllers only. It
-  reads USB devices through a USB-A socket on GPIO 20/21 (see [Boards](#boards)), which
-  the PCB does not have. On v2.8, SNES controllers plug in directly; on v2.6, NES
+- **Controllers.** On v2.8, SNES controllers plug in directly; on v2.6, NES
   controllers do, and a SNES controller needs a
   [SNES-to-NES adapter cable](https://github.com/PicoPlus-devel/pico-snesPlus/blob/main/snestonescontroller.md),
   one per port. See [NES and SNES controllers](#nes-and-snes-controllers) for the
-  layout.
+  layout. A USB keyboard, mouse or gamepad goes on the Pico Plus 2's USB-C port
+  through an OTG adapter or Y-cable (see [Boards](#boards)).
 - **Sound.** Over HDMI. The PCB has no place for the optional PCM5100A DAC; its pins are
   used by controller port 2.
 - **microSD breakout.** The PCB is laid out for the smaller
@@ -263,10 +264,9 @@ updateAll in the archive's `updateAll` folder.
 - Other applications started from the bootloader may overwrite part of the flash memory
   that holds the copied level data. The next load of an affected level is then slow
   again, as on its first load.
-- On the Pico Plus 2 board, USB devices must be connected to the USB-A socket on
-  GPIO 20/21 (see [Boards](#boards)). The bootloader and the emulators take USB
-  controllers on the Pico's own USB port instead; Quake II does not. NES and SNES
-  controllers in the controller ports work in both.
+- On the Pico Plus 2 board, Quake II takes USB devices on the Pico's own USB port, as
+  the bootloader and the emulators do. NES and SNES controllers in the controller ports
+  work in all of them.
 - The standalone firmware files cannot be started from the bootloader. The bootloader
   version is built with `./fruitjam-build-forbootloader.sh` or
   `./adafruitdvisd-build-forbootloader.sh` (see [Building from source](#building-from-source))

@@ -30,7 +30,7 @@ Boards. Each has a `<tag>_cflags.h`, force-included into every translation unit,
 | Tag | Board | `PICO_BOARD` |
 |---|---|---|
 | `fruitjam` | Adafruit Fruit Jam (HW_CONFIG 8): TLV320 DAC with headphone detect, PIO-USB on GPIO 1/2 | `adafruit_fruit_jam` |
-| `adafruitdvisd` | pico_shared HW_CONFIG 2: Pimoroni Pico Plus 2 with the Adafruit DVI breakout (HSTX on GPIO 12–19, not inverted) and microSD breakout (SPI0 on GPIO 2–5); PIO-USB on GPIO 20/21; NES/SNES ports on GPIO 6–8 and 9–11; optional PCM5100A on GPIO 26–28 | `pico2` |
+| `adafruitdvisd` | pico_shared HW_CONFIG 2: Pimoroni Pico Plus 2 with the Adafruit DVI breakout (HSTX on GPIO 12–19, not inverted) and microSD breakout (SPI0 on GPIO 2–5); USB host on the native USB port (USB-C); NES/SNES ports on GPIO 6–8 and 9–11; optional PCM5100A on GPIO 26–28 | `pico2` |
 
 `pico2` is what pico_shared's `bld.sh` uses for HW_CONFIG 2. Its header declares an
 RP2350A with 4 MB of flash, but GPIO 47 (PSRAM chip select) is still driven, and the
@@ -56,9 +56,9 @@ flash size is overridden (see [Flash layout](#flash-layout-16-mb-boards)).
   the other direction, the loader CRCs an application and its aux image in flash before
   trusting its `.flashed` record, and pico_shared CRCs a ROM it left in flash before
   reusing it. An overlap therefore costs refill time only.
-- On HW_CONFIG 2, input is PIO-USB on GPIO 20/21 and the NES/SNES ports. The loader and the
-  emulators are built without PIO-USB for that configuration and use the native USB port,
-  which this build leaves unused (PLL_USB drives `clk_hstx`).
+- On HW_CONFIG 2, input is the native USB port (the module's USB-C port) and the NES/SNES
+  ports, as in the loader and the emulators. PLL_USB stays at 48 MHz for the USB
+  controller, so `clk_hstx` runs from `clk_sys` (378 / 3 MHz) there.
 
 Bring-up and debugging:
 - **Flashing:** `tools/flash.sh <elf> [uart-log]` programs over a CMSIS-DAP probe with
@@ -136,7 +136,7 @@ tools/release_notes.sh v0.1-alpha   # the CHANGELOG.md section of that tag
 
 | File | Role |
 |---|---|
-| `src/pico/q2_usb.cpp` | TinyUSB host on Pico-PIO-USB (PIO2; Fruit Jam GPIO 1/2 with port power on GPIO 11, HW_CONFIG 2 GPIO 20/21); a 4 ms timer at the lowest priority runs `tuh_task` and samples every device |
+| `src/pico/q2_usb.cpp` | TinyUSB host: Pico-PIO-USB on the Fruit Jam (PIO2, GPIO 1/2 with port power on GPIO 11), the native USB controller on HW_CONFIG 2; a 4 ms timer at the lowest priority runs `tuh_task` and samples every device |
 | `src/pico/q2_nespad.cpp` | NES/SNES controller ports (pico_shared nespad on PIO1), polled from the same timer without blocking and merged into the pad buttons: SNES pads by position, NES pads by name (A → right, B → bottom) |
 | `src/pico/q2_usb_frame.c` | The 1 ms USB frame, and SOFs during flash writes |
 | `src/pico/q2_input.c` | HID keyboard usages, mouse and pad buttons to Quake II keys; mouse and right stick to `QG_GetMouseDiff`; the default pad bindings (`QG_PlatformConfig`) |
@@ -178,7 +178,8 @@ Problems found on the way:
     not recover: its light went out and every transfer after the first report failed.
   - Now every interrupt except the USB frame one is masked during a flash write. The frame
     handler is in SRAM and sends a bare SOF while flash is busy, because PIO-USB's full
-    frame calls into flash.
+    frame calls into flash. The native USB controller (HW_CONFIG 2) sends its frames by
+    itself, so there every interrupt is masked.
 - **One failed transfer silenced a pad.**
   - TinyUSB passes a failed transfer to the HID driver as a zero-length report.
   - Most of the driver's error paths ("Invalid DS4 report size 0") returned without

@@ -1,4 +1,5 @@
-// q2_usb.cpp -- USB host for keyboards, mice and gamepads on Pico-PIO-USB.
+// q2_usb.cpp -- USB host for keyboards, mice and gamepads, on Pico-PIO-USB (boards
+// with HAS_USBPIO) or on the RP2350's native USB controller (the others).
 //
 // The pico_shared HID driver (3rdparty/pico_shared_drivers/usb_hid) keeps the
 // latest state of every device in io::. This file brings the host stack up and
@@ -9,12 +10,13 @@
 // q2_input_sample (q2_input.c), with the NES/SNES controller ports
 // (q2_nespad.cpp) merged into the gamepad buttons.
 //
-// The 1 ms USB frame runs from its own SRAM-resident interrupt
-// (q2_usb_frame.c), which also keeps SOFs going while flash is written.
+// With PIO-USB, the 1 ms USB frame runs from its own SRAM-resident interrupt
+// (q2_usb_frame.c), which also keeps SOFs going while flash is written. The
+// native controller makes its frames itself, also during a flash write.
 //
 // tuh_task and the HID callbacks run from flash, which is safe because flash
-// writes (q2_flash.c) mask every interrupt but the frame one on core0, and
-// core1 never touches USB.
+// writes (q2_flash.c) mask every interrupt on core0 (but the PIO-USB frame one),
+// and core1 never touches USB.
 
 #include <stdio.h>
 #include <string.h>
@@ -25,14 +27,12 @@
 #include "hardware/timer.h"
 #include "hardware/dma.h"
 #include "tusb.h"
+#ifdef HAS_USBPIO
 #include "pio_usb_configuration.h"
+#endif
 #include "gamepad.h"
 
 #include "q2_input.h"
-
-#ifndef HAS_USBPIO
-#error "q2_usb.cpp needs a board with Pico-PIO-USB (HAS_USBPIO)"
-#endif
 
 #define USB_TICK_US		4000
 #define USB_TICK_ALARM	1		// hardware alarm for the sampling timer
@@ -136,6 +136,7 @@ void q2_usb_look (int *x, int *y)
 
 void q2_usb_init (void)
 {
+#ifdef HAS_USBPIO
 #ifdef PIN_USB_HOST_VBUS
 	gpio_init (PIN_USB_HOST_VBUS);
 	gpio_set_dir (PIN_USB_HOST_VBUS, GPIO_OUT);
@@ -154,17 +155,25 @@ void q2_usb_init (void)
 	dma_channel_unclaim (pio_cfg.tx_ch);	// pio_usb_bus_init claims it again
 	pio_cfg.skip_alarm_pool = true;	// frames come from q2_usb_frame.c
 	tuh_configure (CFG_TUH_RPI_PIO_USB, TUH_CFGID_RPI_PIO_USB_CONFIGURATION, &pio_cfg);
+#endif
 
 	const tusb_rhport_init_t	host_init = {
 		.role = TUSB_ROLE_HOST,
 		.speed = TUSB_SPEED_AUTO,
 	};
+	// root port 1 is PIO-USB, 0 the native controller (tusb_config.h)
 	tusb_init (CFG_TUH_RPI_PIO_USB, &host_init);
+#ifdef HAS_USBPIO
 	q2_usb_frame_start ();
+#endif
 
 	// Devices enumerate in the background once the timer runs.
 	tick_pool = alarm_pool_create (USB_TICK_ALARM, 1);
 	irq_set_priority (hardware_alarm_get_irq_num (USB_TICK_ALARM), PICO_LOWEST_IRQ_PRIORITY);
 	alarm_pool_add_repeating_timer_us (tick_pool, -USB_TICK_US, usb_tick, NULL, &tick_timer);
+#ifdef HAS_USBPIO
 	printf ("q2_usb: PIO-USB host on GPIO %d/%d\n", PIN_USB_HOST_DP, PIN_USB_HOST_DM);
+#else
+	printf ("q2_usb: USB host on the native USB port\n");
+#endif
 }
