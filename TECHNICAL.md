@@ -8,7 +8,8 @@ Developer notes for the Quake II port to RP2350 (HSTX video, at least 378 MHz, 8
 Phase 0 (host harness and memory diet) is complete. Phase 1 (firmware) runs on the
 Adafruit Fruit Jam: the attract demo plays from the SD card through the flash asset cache.
 Phase 2 (performance) has started. Phase 3 is done apart from testing more input devices:
-- USB input works (tested with a DualShock 4).
+- USB input works (tested with a DualShock 4, a USB keyboard and a USB mouse), and so does
+  the SNES Mouse in the controller ports of the Pico Plus 2 board.
 - Sound plays over HDMI or the headphone jack.
 - Saves load after a reset and across firmware builds.
 
@@ -683,7 +684,8 @@ are:
 
 ## Next steps
 
-- Test a keyboard, a mouse and an XInput pad. (The headphone switch works.)
+- Test an XInput pad. (The headphone switch, a USB keyboard and mouse, and the SNES Mouse
+  work.)
 - SRAM is nearly full: 13 KB of the 68 KB SRAM heap is free.
   - USB input took 23 KB.
   - Sound took 32 KB (ring) + 16 KB (I2S) + 36 KB (HDMI queue) + 9 KB (mixer).

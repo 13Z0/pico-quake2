@@ -37,10 +37,10 @@ test program, which runs the same game code and reproduces the board's colour de
 - Video over HDMI at 640×480
 - Sound effects over HDMI, the Fruit Jam's headphone jack, or a PCM5100A DAC on the Pico
   Plus 2 board (see [Sound](#sound))
-- USB gamepad input, tested with a DualShock 4 (see [Controls](#controls)); keyboards
-  and mice are supported but not yet tested
+- USB gamepad, keyboard and mouse input, tested with a DualShock 4 and a USB keyboard and
+  mouse (see [Controls](#controls))
 - NES and SNES controllers in the controller ports of the Pico Plus 2 board, and an
-  original SNES Mouse (not yet tested)
+  original SNES Mouse
 - Savegames and settings on the SD card
 - Errors are shown on the screen, so no serial cable or computer is needed to find out
   what went wrong
@@ -68,10 +68,9 @@ test program, which runs the same game code and reproduces the board's colour de
   refreshed automatically.
 - **Only the demo has been tested.** The data files of the full game are read the same
   way, but none of its levels have been tried, and some may not fit in memory.
-- **Untested input devices.** Of the USB devices, only a Sony DualShock 4 has been
-  tested. Keyboards, mice, Xbox-compatible (XInput) pads and other USB gamepads are
-  supported by the code but have not been tested yet, nor has the SNES Mouse in the
-  controller ports of the Pico Plus 2 board.
+- **Untested input devices.** Of the USB gamepads, only a Sony DualShock 4 has been
+  tested. Xbox-compatible (XInput) pads and other USB gamepads are supported by the code
+  but have not been tested yet.
 - **Not every action is on the gamepad.** Using an inventory item, such as Quad Damage
   or the rebreather, and selecting a weapon directly require a keyboard.
 - **No music.** The original game played its music from the CD, which is not supported.
