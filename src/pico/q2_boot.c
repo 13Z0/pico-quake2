@@ -172,6 +172,12 @@ Status line on the UART every 5 seconds: frame rate, engine heap, flash cache.
 ==============================================================================
 */
 
+// Q2_STATUS_DIAG=1: print the status line (off by default, to keep the console quiet)
+#ifndef Q2_STATUS_DIAG
+#define Q2_STATUS_DIAG	0
+#endif
+
+#if Q2_STATUS_DIAG
 // core0's stack (cmake/psram_linker.cmake) is painted at boot, so the status
 // line can report how deep it has been used, interrupts included (the USB
 // timer runs on the same stack).
@@ -231,6 +237,7 @@ static void report_status (int now, int *frames)
 	*frames = 0;
 	last = now;
 }
+#endif
 
 /*
 ==============================================================================
@@ -257,9 +264,13 @@ int main (void)
 	static char	*argv[] = { "quake2", "+set", "basedir", Q2_ASSET_DIR, NULL };
 	size_t		heap_size;
 	void		*heap;
-	int			oldtime, newtime, frames = 0;
+	int			oldtime, newtime;
+
+#if Q2_STATUS_DIAG
+	int			frames = 0;
 
 	paint_stack ();
+#endif
 	release_peripheral_reset ();
 	q2_flash_probe ();		// before the overclock and the PSRAM
 	setup_clocks ();
@@ -301,6 +312,8 @@ int main (void)
 		Quake2_Frame (msec);
 		q2_flash_idle ();
 		oldtime = newtime;
+#if Q2_STATUS_DIAG
 		report_status (newtime, &frames);
+#endif
 	}
 }
