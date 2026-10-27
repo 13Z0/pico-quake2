@@ -105,6 +105,11 @@ Pico 2 has no PSRAM and does not work. It is wired as follows:
 
 USB devices are connected to the USB-C port of the Pico Plus 2 through a USB OTG adapter
 or Y-cable, which also has to supply the board's power; several devices need a USB hub.
+The board draws the most current while the game starts. If a bus-powered hub with several
+devices is connected, or a SNES Mouse is also plugged in, the supply may not keep up, and
+the board then restarts again and again during start-up. A powered USB hub, or a stronger
+supply on the Y-cable, prevents this. Alternatively, connect some of the devices after
+the attract demo has started.
 
 ## PicoNES PCB
 
