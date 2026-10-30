@@ -39,7 +39,7 @@ set(Q2_CPU_KHZ "378000" CACHE STRING "System clock in kHz (a multiple of 126000)
 if (Q2_CPU_KHZ GREATER 378000)
     set(_q2_vreg_default VREG_VOLTAGE_1_70)		# as the emulators (pico_shared) at 504 MHz
 else()
-    set(_q2_vreg_default VREG_VOLTAGE_1_50)
+    set(_q2_vreg_default VREG_VOLTAGE_1_35)
 endif()
 set(Q2_VREG "${_q2_vreg_default}" CACHE STRING "Core voltage (VREG_VOLTAGE_*)")
 message(STATUS "pico-quake2 clock: ${Q2_CPU_KHZ} kHz at ${Q2_VREG}")

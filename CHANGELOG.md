@@ -33,6 +33,8 @@ card, and the game is played with a USB gamepad or a USB keyboard and mouse.
 - If the board is reset during the first load of a level, the next load continues from
   what was already copied instead of starting again.
 - USB keyboards and mice have now been tested and work.
+- The processor runs at a lower core voltage (1.35 V instead of 1.50 V), so the board
+  uses less power and runs cooler.
 
 ## v0.2.1-alpha
 

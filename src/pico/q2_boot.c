@@ -98,7 +98,7 @@ Clocks
 #define Q2_CPU_KHZ	378000
 #endif
 #ifndef Q2_VREG
-#define Q2_VREG		VREG_VOLTAGE_1_50
+#define Q2_VREG		VREG_VOLTAGE_1_35
 #endif
 #if Q2_CPU_KHZ % 126000
 #error Q2_CPU_KHZ must be a multiple of 126000

@@ -24,6 +24,15 @@ Phase 2 (performance) has started. Phase 3 is done apart from testing more input
 ```
 
 Options (CMake): `Q2_CPU_KHZ` (a multiple of 126000), `Q2_VREG`, `Q2_ZBUFFER_SRAM`.
+- `Q2_VREG` defaults to `VREG_VOLTAGE_1_35` at 378 MHz and `VREG_VOLTAGE_1_70` above.
+  The pico_shared emulators use 1.50 V at 378 MHz. At 1.35 V the Pico Plus 2 board ran the
+  timedemo at the same speed (22.9 fps), with less heat and a lower power draw.
+- 1.35 V is the lowest usable setting: other users found 1.30 V unreliable at 378 MHz.
+  Anything above 1.30 V (`VREG_VOLTAGE_MAX`) needs `vreg_disable_voltage_limit()`, which
+  `setup_clocks()` calls.
+- These are CMake cache variables, so an existing build folder keeps the voltage it was
+  configured with. Configure with `--fresh` (or delete the folder) after the default
+  changes; `buildAll.sh` always starts from fresh folders.
 
 Boards. Each has a `<tag>_cflags.h`, force-included into every translation unit, and a
 `<tag>-build.sh`:
