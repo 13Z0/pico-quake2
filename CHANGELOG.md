@@ -24,6 +24,9 @@ card, and the game is played with a USB gamepad or a USB keyboard and mouse.
   had played through once.
 - NES and SNES controllers could stop responding after a level was loaded for the first
   time.
+- On the Adafruit Fruit Jam, USB devices were often not found at start-up. Also, after
+  switching on with a low-speed mouse attached, sometimes no USB device worked until the
+  board was reset.
 
 ### Changed
 
