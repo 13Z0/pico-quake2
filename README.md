@@ -371,8 +371,9 @@ Bindings can be changed in **Options → Customize controls**.
 
 ### Settings
 
-The view size (**screen size**) and **brightness** are set in the **Video** menu. Only
-these two entries of that menu apply to the board; leave the others unchanged. The view
+The view size (**screen size**), the **brightness** and the [display mode](#display-mode)
+(**display**) are set in the **Video** menu. Only these three entries of that menu apply
+to the board; leave the others unchanged. The view
 starts at 70% of the screen to keep the frame rate up, and the brightness starts above
 the original game's default.
 
@@ -398,6 +399,22 @@ Sound plays over HDMI.
   instead. The board's speaker is not used.
 - **Pico Plus 2 board:** if a PCM5100A DAC is fitted, sound plays over HDMI and the DAC
   at the same time.
+
+## Display mode
+
+The HDMI connector sends either an HDMI or a DVI signal. HDMI carries picture and sound.
+DVI carries the picture only and is meant for monitors and TVs that do not accept an HDMI
+signal; the sound then plays on the board's own audio output: on the Fruit Jam the
+speaker, or the headphones while they are plugged in, and on the Pico Plus 2 board the
+PCM5100A DAC if one is fitted.
+
+The mode is set under **Video → display**. The picture switches at once, and the choice is
+stored in `/settings_QUAKE2.dat` on the SD card. Without a stored choice the game starts
+in HDMI.
+
+When the game is started from [pico-bootLoader](https://github.com/PicoPlus-devel/pico-bootLoader),
+it uses the display mode set in the bootloader's menu (`DISPLAY=` in `/boot.txt`) instead. A
+change made in the game then applies until the next start.
 
 ## When something goes wrong
 

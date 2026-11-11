@@ -88,6 +88,10 @@ const char *QG_PlatformConfig(void) { return ""; }
 #endif
 void QG_Mkdir(const char *path) { mkdir(path, 0777); }
 const char *QG_ConsoleInput(void) { return NULL; }
+/* the Video menu's display mode (src/pico/q2_display.c on the board) */
+static int host_display_dvi;
+int QG_GetDisplayDVI(void) { return host_display_dvi; }
+void QG_SetDisplayDVI(int dvi) { host_display_dvi = dvi; }
 
 /* directory listing: opendir + fnmatch on the last path component */
 static DIR *find_dir;

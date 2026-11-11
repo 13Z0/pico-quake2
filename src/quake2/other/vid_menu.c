@@ -1,5 +1,6 @@
 #include "../client/client.h"
 #include "../client/qmenu.h"
+#include "../quakegeneric.h"	// pico-quake2: QG_GetDisplayDVI, QG_SetDisplayDVI
 
 #define REF_SOFT	0
 #define REF_SOFTX11	1
@@ -47,6 +48,7 @@ static menulist_s  		s_fs_box[2];
 static menulist_s  		s_stipple_box;
 static menulist_s  		s_paletted_texture_box;
 static menulist_s  		s_windowed_mouse;
+static menulist_s		s_display_box;		// pico-quake2: HDMI or DVI
 static menuaction_s		s_apply_action[2];
 static menuaction_s		s_defaults_action[2];
 
@@ -65,6 +67,12 @@ static void DriverCallback( void *unused )
 		s_current_menu_index = 1;
 	}
 
+}
+
+// pico-quake2: switches the picture at once (no "apply"), and stores the choice.
+static void DisplayCallback( void *unused )
+{
+	QG_SetDisplayDVI( s_display_box.curvalue );
 }
 
 static void ScreenSizeCallback( void *s )
@@ -309,13 +317,13 @@ void VID_MenuInit( void )
 		s_defaults_action[i].generic.type = MTYPE_ACTION;
 		s_defaults_action[i].generic.name = "reset to default";
 		s_defaults_action[i].generic.x    = 0;
-		s_defaults_action[i].generic.y    = 90;
+		s_defaults_action[i].generic.y    = 100;	// pico-quake2: 90, room for "display"
 		s_defaults_action[i].generic.callback = ResetDefaults;
 
 		s_apply_action[i].generic.type = MTYPE_ACTION;
 		s_apply_action[i].generic.name = "apply";
 		s_apply_action[i].generic.x    = 0;
-		s_apply_action[i].generic.y    = 100;
+		s_apply_action[i].generic.y    = 110;	// pico-quake2: 100
 		s_apply_action[i].generic.callback = ApplyChanges;
 	}
 
@@ -332,6 +340,24 @@ void VID_MenuInit( void )
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
+
+	// pico-quake2: the display mode of the HDMI connector
+	{
+		static const char *display_names[] =
+		{
+			"HDMI",
+			"DVI",
+			0
+		};
+
+		s_display_box.generic.type = MTYPE_SPINCONTROL;
+		s_display_box.generic.x	= 0;
+		s_display_box.generic.y	= 82;
+		s_display_box.generic.name	= "display";
+		s_display_box.generic.callback = DisplayCallback;
+		s_display_box.curvalue = QG_GetDisplayDVI() ? 1 : 0;
+		s_display_box.itemnames = display_names;
+	}
 
 	s_tq_slider.generic.type	= MTYPE_SLIDER;
 	s_tq_slider.generic.x		= 0;
@@ -355,6 +381,7 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_software_menu, ( void * ) &s_fs_box[SOFTWARE_MENU] );
 	Menu_AddItem( &s_software_menu, ( void * ) &s_stipple_box );
 	Menu_AddItem( &s_software_menu, ( void * ) &s_windowed_mouse );
+	Menu_AddItem( &s_software_menu, ( void * ) &s_display_box );	// pico-quake2
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ref_list[OPENGL_MENU] );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list[OPENGL_MENU] );

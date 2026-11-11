@@ -32,6 +32,7 @@
 #include "quakegeneric.h"
 #include "q2_fatfs_io.h"
 #include "q2_fatal.h"
+#include "q2_settings.h"
 
 #define Q2_MAXFDS		8		// the engine keeps one handle per pak open plus a few files
 #define Q2_FD_BASE		3		// clear of stdio fds 0/1/2
@@ -81,6 +82,9 @@ void q2_fatfs_init (void)
 	if (fr != FR_OK)
 		q2_fatal ("No SD card (FatFs error %d).\n"
 			"Insert a FAT/exFAT card with\n" Q2_ASSET_DIR "/baseq2/pak0.pak.", fr);
+	// Before the display starts (q2_boot.c), so it starts in the right mode,
+	// and before the checks below, so their screens show in it.
+	q2_settings_load ();
 	fr = f_chdir (Q2_ASSET_DIR);
 	if (fr != FR_OK)
 		q2_fatal (Q2_ASSET_DIR " not found on the SD card.\n"

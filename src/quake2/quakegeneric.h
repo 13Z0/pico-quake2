@@ -25,4 +25,10 @@ const char *QG_ConsoleInput(void);
 // (platform key bindings and cvar defaults), "" for none.
 const char *QG_PlatformConfig(void);
 
+// pico-quake2: the display mode of the HDMI connector, for the Video menu: 1 for
+// DVI (no audio on the cable), 0 for HDMI. Setting it switches the running picture
+// and stores the choice on the SD card.
+int QG_GetDisplayDVI(void);
+void QG_SetDisplayDVI(int dvi);
+
 #endif

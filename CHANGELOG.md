@@ -6,6 +6,17 @@ card, and the game is played with a USB gamepad or a USB keyboard and mouse.
 
 [The files of this release are listed at the end of these notes](#downloads___).
 
+## v0.4-alpha
+
+### Added
+
+- **DVI display mode**, for monitors and TVs that do not accept an HDMI signal. Choose
+  HDMI or DVI under *Video → display*; the picture switches at once and the choice is
+  kept on the SD card. DVI carries no sound: it plays on the board's own audio output
+  instead (on the Fruit Jam the speaker, or the headphones when plugged in).
+- Started from [pico-bootLoader](https://github.com/PicoPlus-devel/pico-bootLoader),
+  the game uses the display mode set in the bootloader's menu.
+
 ## v0.3.1-alpha
 
 ### Fixed

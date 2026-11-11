@@ -5,6 +5,10 @@
 // expands each 320-pixel row through a 256-entry table of doubled RGB555 pixels into
 // the 640-pixel line, and each row is sent twice for 480 lines. Buffer flips and
 // palette changes are latched at vsync, so neither tears.
+//
+// The output runs in HDMI mode (with data-island audio) or DVI mode (no audio on
+// the cable, see q2_audio.c). The mode to start in comes from q2_settings.c; the
+// Video menu switches it while the picture runs (QG_SetDisplayDVI).
 
 #include <string.h>
 #include <stdio.h>
@@ -20,6 +24,9 @@
 
 #include "q2_display.h"
 #include "q2_console.h"
+#include "q2_audio.h"
+#include "q2_settings.h"
+#include "quakegeneric.h"
 
 #define FB_W	320
 #define FB_H	240
@@ -97,10 +104,11 @@ void q2_display_init (void)
 	front = 0;
 	lut_front = 0;
 
-	// HDMI mode, with data-island audio at 44.1 kHz (q2_audio.c). The rate is set
-	// after video_output_init (which sets 48 kHz) and before core1 starts, since it
-	// rebuilds the blanking lines core1 sends.
-	video_output_set_dvi_mode (false);
+	// HDMI or DVI as stored (q2_settings.c). HDMI carries data-island audio at
+	// 44.1 kHz (q2_audio.c). The rate is set after video_output_init (which sets
+	// 48 kHz) and before core1 starts, since it rebuilds the blanking lines core1
+	// sends. The audio queue is set up in DVI mode as well, for a later switch.
+	video_output_set_dvi_mode (q2_settings_boot_dvi ());
 	hstx_di_queue_init ();		// the audio queue and its silence packet (hstx.c, not built, would do it)
 	video_output_set_vsync_callback (vsync_cb);
 	video_output_init (FB_W * 2, FB_H * 2);
@@ -110,7 +118,23 @@ void q2_display_init (void)
 	video_up = true;
 
 	q2_console_show (fb[0]);
-	printf ("q2_display: HSTX 640x480 up\n");
+	printf ("q2_display: HSTX 640x480 %s up\n", video_output_get_dvi_mode () ? "DVI" : "HDMI");
+}
+
+// The Video menu's display mode (other/vid_menu.c): 1 for DVI, 0 for HDMI.
+int QG_GetDisplayDVI (void)
+{
+	return video_output_get_dvi_mode ();
+}
+
+// Switches the running picture and stores the choice. The HSTX DMA interrupt
+// reads the mode on every scanline, so this is safe at any time.
+void QG_SetDisplayDVI (int dvi)
+{
+	video_output_set_dvi_mode (dvi != 0);
+	q2_audio_display_changed ();
+	q2_settings_save_display (dvi != 0);
+	printf ("q2_display: %s\n", dvi ? "DVI" : "HDMI");
 }
 
 void q2_display_show_console (void)

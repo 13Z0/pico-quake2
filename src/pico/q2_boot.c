@@ -295,8 +295,13 @@ int main (void)
 		(unsigned long)(clock_get_hz (clk_peri) / 1000000),
 		(unsigned long)(qmi_hw->m[0].timing & 0xff));
 
-	// PSRAM before the display: SetupPsram stalls XIP while it runs
+	// PSRAM before the display: SetupPsram stalls XIP while it runs. The SD card
+	// before the display too: it holds the display mode (HDMI or DVI) to start in
+	// (q2_settings.c). The console keeps what is printed until the display shows
+	// it, and q2_fatal starts the display itself (in the board's default mode when
+	// there is no card).
 	q2_psram_init ();
+	q2_fatfs_init ();
 	q2_display_init ();
 	if (q2_psram_error ())
 		q2_fatal ("%s", q2_psram_error ());
@@ -304,7 +309,6 @@ int main (void)
 	heap = q2_psram_heap (&heap_size);
 	Qmem_Init (heap, heap_size);
 
-	q2_fatfs_init ();
 	q2_flash_init ();
 
 	Quake2_Init (4, argv);

@@ -8,4 +8,8 @@
 void q2_audio_hold (void);
 void q2_audio_release (void);
 
+// After a switch between HDMI and DVI display mode (q2_display.c): the sound
+// follows at the next frame (DVI has no audio on the cable, see q2_audio.c).
+void q2_audio_display_changed (void);
+
 #endif

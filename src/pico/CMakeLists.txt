@@ -15,9 +15,11 @@ add_executable(quake2
     q2_input.c
     q2_nespad.cpp
     q2_psram.c
+    q2_settings.c
     q2_sys.c
     q2_usb.cpp
     q2_usb_frame.c
+    pico_bootcfg.c
     # the engine heap (not force-included with the heap redirect, see q2_force.h)
     ${CMAKE_SOURCE_DIR}/src/quake2/other/q_mem.c
     ${CMAKE_SOURCE_DIR}/3rdparty/tlsf/tlsf.c

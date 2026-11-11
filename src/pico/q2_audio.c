@@ -7,17 +7,23 @@
 // scanline interrupts, which takes frames at the play position, interpolates them to
 // 44100 Hz and hands them to the active sink:
 //
-//   HDMI   data-island audio in the video signal (the default)
-//   jack   I2S to the TLV320 DAC, while headphones are plugged in
+//   HDMI   data-island audio in the video signal (HDMI display mode)
+//   jack   I2S to the board's DAC: on the Fruit Jam the headphones while they are
+//          plugged in, and in DVI display mode its speaker otherwise
 //
-// As in pico-duke3D, the Fruit Jam's speaker never plays, and the jack gets silence
-// while HDMI is active so the DAC's PLL stays locked and plugging in does not pop.
+// In HDMI mode the Fruit Jam's speaker never plays (as in pico-duke3D), and the jack
+// gets silence while HDMI is active so the DAC's PLL stays locked and plugging in
+// does not pop.
 //
 // A board whose I2S DAC has no headphone detect (Q2_AUDIO_I2S_DRIVER other than
-// TLV320, e.g. the PCM5100A of HW_CONFIG 2) plays to both sinks at once, as
-// pico-duke3D does there: each sample goes to HDMI and to I2S, and the sink with
-// less room decides how much is taken, so the slower of the two clocks paces the
-// play position.
+// TLV320, e.g. the PCM5100A of HW_CONFIG 2) plays to both sinks at once in HDMI
+// mode, as pico-duke3D does there: each sample goes to HDMI and to I2S, and the sink
+// with less room decides how much is taken, so the slower of the two clocks paces
+// the play position.
+//
+// DVI display mode carries no audio, and the HSTX driver does not take data islands
+// from the queue then, so the HDMI sink is never used in it: everything goes to I2S
+// (apply_route). A board without a working DAC is silent in DVI mode.
 //
 // Play stops at the last painted frame instead of wrapping into stale audio: when
 // core0 stalls (a slow frame, asset caching) the sink gets silence, and the play
@@ -70,6 +76,8 @@ static volatile uint32_t	painted_end;			// play_pos value up to which the ring i
 static uint32_t			seen_pos;				// play_pos as of the last SNDDMA_GetDMAPos
 static volatile sink_t	sink = SINK_HDMI;
 static bool				i2s_ok;
+static bool				hp_in;			// headphones plugged in (TLV320 jack detect)
+static bool				route_dirty = true;	// sink to be decided again (core0)
 static int16_t			prev_l, prev_r;
 
 // core0 <-> core1 handshake around flash writes
@@ -205,6 +213,38 @@ void q2_audio_release (void)
 	hold = false;
 }
 
+// Picks the sink for the display mode and the jack, on core0 (codec I2C). Core1
+// only reads `sink`.
+static void apply_route (void)
+{
+	bool	dvi = video_output_get_dvi_mode ();
+	sink_t	s;
+
+	route_dirty = false;
+	if (!i2s_ok)
+		s = SINK_HDMI;
+	else if (HAS_JACK_DETECT)
+	{
+		s = (dvi || hp_in) ? SINK_JACK : SINK_HDMI;
+		// HDMI: the monitor plays, the speaker never does. DVI: the speaker plays
+		// unless headphones are plugged in (the codec mutes it for them itself).
+		audio_i2s_muteInternalSpeaker (!dvi || hp_in);
+	}
+	else
+		s = dvi ? SINK_JACK : SINK_BOTH;
+	if (s != sink)
+	{
+		sink = s;
+		printf ("q2_audio: %s\n", s == SINK_HDMI ? "HDMI" : s == SINK_BOTH ? "HDMI and I2S"
+			: !HAS_JACK_DETECT ? "I2S" : hp_in ? "headphones" : "speaker");
+	}
+}
+
+void q2_audio_display_changed (void)
+{
+	route_dirty = true;
+}
+
 /*
 ==============================================================================
 
@@ -245,12 +285,10 @@ qboolean SNDDMA_Init (void)
 			audio_i2s_setVolume (14);
 			// a headset plugged in at boot arrives as the first poll's CONNECT
 		}
-		else
-		{
-			sink = SINK_BOTH;
-			printf ("q2_audio: HDMI and I2S\n");
-		}
+		route_dirty = true;
 	}
+	if (route_dirty)
+		apply_route ();
 
 	video_output_set_background_task (q2_audio_core1_task);
 	printf ("q2_audio: %d Hz mix, %d Hz out\n", MIX_RATE, OUT_RATE);
@@ -287,18 +325,15 @@ void SNDDMA_Submit (void)
 	__dmb ();					// the frames before the new end are in the ring
 	painted_end = seen_pos + (uint32_t)(ahead > 0 ? ahead : 0);
 
-	if (!i2s_ok || !HAS_JACK_DETECT)
-		return;
-	ev = tlv320_poll_headphone ();
-	if (ev == HP_TOGGLE_CONNECT)
+	if (i2s_ok && HAS_JACK_DETECT)
 	{
-		sink = SINK_JACK;
-		printf ("q2_audio: headphones\n");
+		ev = tlv320_poll_headphone ();
+		if (ev == HP_TOGGLE_CONNECT || ev == HP_TOGGLE_DISCONNECT)
+		{
+			hp_in = ev == HP_TOGGLE_CONNECT;
+			route_dirty = true;
+		}
 	}
-	else if (ev == HP_TOGGLE_DISCONNECT)
-	{
-		sink = SINK_HDMI;
-		audio_i2s_muteInternalSpeaker (true);	// the speaker never plays
-		printf ("q2_audio: HDMI\n");
-	}
+	if (route_dirty)
+		apply_route ();
 }
