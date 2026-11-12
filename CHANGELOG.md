@@ -13,9 +13,14 @@ card, and the game is played with a USB gamepad or a USB keyboard and mouse.
 - **DVI display mode**, for monitors and TVs that do not accept an HDMI signal. Choose
   HDMI or DVI under *Video → display*; the picture switches at once and the choice is
   kept on the SD card. DVI carries no sound: it plays on the board's own audio output
-  instead (on the Fruit Jam the speaker, or the headphones when plugged in).
-- Started from [pico-bootLoader](https://github.com/PicoPlus-devel/pico-bootLoader),
-  the game uses the display mode set in the bootloader's menu.
+  instead (on the Fruit Jam the speaker, or the headphones when plugged in; on the Pico
+  Plus 2 board only when a PCM5100A DAC is fitted).
+- **Waveshare RP2350-PiZero on the PCB by Liu Szuping** (@szuping) is now supported
+  (`pico-quake2_pizeroliupcb.uf2`). Picture over the PCB's
+  HDMI port, sound over HDMI and the audio jack at the same time, a USB gamepad or
+  keyboard on the PiZero's PIO-USB port, and two NES/SNES controller ports. Quake II
+  needs 8 MB of PSRAM soldered onto the PiZero. Tested on this board. The PCB
+  design is not yet available.
 
 ## v0.3.1-alpha
 
@@ -156,12 +161,13 @@ for details.
 
 | Board | Firmware |
 |:--|:--|
-| Adafruit Fruit Jam | [pico-quake2_fruitjam.uf2](https://github.com/PicoPlus-devel/pico-quake2/releases/download/v0.2-alpha/pico-quake2_fruitjam.uf2) |
-| Pimoroni Pico Plus 2 with the Adafruit DVI and microSD breakouts (HW_CONFIG 2) | [pico-quake2_adafruitdvisd.uf2](https://github.com/PicoPlus-devel/pico-quake2/releases/download/v0.2-alpha/pico-quake2_adafruitdvisd.uf2) |
+| Adafruit Fruit Jam | [pico-quake2_fruitjam.uf2](https://github.com/PicoPlus-devel/pico-quake2/releases/latest/download/pico-quake2_fruitjam.uf2) |
+| Pimoroni Pico Plus 2 with the Adafruit DVI and microSD breakouts (HW_CONFIG 2) | [pico-quake2_adafruitdvisd.uf2](https://github.com/PicoPlus-devel/pico-quake2/releases/latest/download/pico-quake2_adafruitdvisd.uf2) |
+| Waveshare RP2350-PiZero on the PCB by Liu Szuping (HW_CONFIG 18) | [pico-quake2_pizeroliupcb.uf2](https://github.com/PicoPlus-devel/pico-quake2/releases/latest/download/pico-quake2_pizeroliupcb.uf2) |
 
 The game data for the SD card is in
-[pico-quake2_demo_sdcard.zip](https://github.com/PicoPlus-devel/pico-quake2/releases/download/v0.2-alpha/pico-quake2_demo_sdcard.zip):
-the Quake II demo (three levels), the same as in v0.1-alpha. Unpack it to the root of the
+[pico-quake2_demo_sdcard.zip](https://github.com/PicoPlus-devel/pico-quake2/releases/latest/download/pico-quake2_demo_sdcard.zip):
+the Quake II demo (three levels). Unpack it to the root of the
 card. It includes id Software's licence agreement for the demo, which must stay with the
 data.
 
