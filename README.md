@@ -134,6 +134,9 @@ Quake II has been tested on this board.
 - **Video and sound.** The picture goes out over the HDMI port of the PCB; the mini HDMI
   port of the RP2350-PiZero is not used. Sound plays over HDMI and the audio jack of the
   PCB at the same time.
+- **Picture drop-outs.** During play, some TVs and monitors lose the picture for a few
+  seconds at a time, while others show it without interruption. This is a limitation of
+  the RP2350-PiZero at 384 MHz, the clock the game runs at.
 - **USB.** A USB gamepad, keyboard or mouse goes on the PIO-USB port of the
   RP2350-PiZero. A USB hub on that port does not work, so only one USB device can be
   used: a gamepad, or a keyboard. A SNES Mouse in a controller port can be used next to
